@@ -30,6 +30,30 @@ async function telegram(env, method, payload) {
 const sendMessage = (env, chatId, text, extra = {}) =>
   telegram(env, "sendMessage", { chat_id: chatId, text, ...extra });
 
+// Mixed visual style: atmospheric GIFs at major game moments only.
+// If Telegram cannot fetch an animation, the normal text message is sent instead.
+const GAME_GIFS = {
+  night: "https://media.tenor.com/2roX3uxz_68AAAAC/wolf-howling.gif",
+  day: "https://media.tenor.com/0AVbKGY_MxMAAAAC/celebrate-happy.gif",
+  win: "https://media.tenor.com/0AVbKGY_MxMAAAAC/celebrate-happy.gif",
+  loss: "https://media.tenor.com/2roX3uxz_68AAAAC/wolf-howling.gif",
+};
+
+async function sendGameMoment(env, chatId, text, mood, extra = {}) {
+  const animation = GAME_GIFS[mood];
+  if (animation) {
+    const result = await telegram(env, "sendAnimation", {
+      chat_id: chatId,
+      animation,
+      caption: text,
+      ...extra,
+    });
+    if (result.ok) return result;
+    console.warn("Animation failed; falling back to text:", mood);
+  }
+  return sendMessage(env, chatId, text, extra);
+}
+
 const answerCallback = (env, callbackId, text) =>
   telegram(env, "answerCallbackQuery", { callback_query_id: callbackId, text });
 
@@ -132,8 +156,8 @@ async function openNight(env, room) {
   room.actions = { killVotes: {}, protect: null, inspect: null };
   room.votes = {};
   await saveRoom(env, room);
-  await sendMessage(env, room.chatId,
-    `🌙 حلّ الليل ${room.round}. الأدوار الخاصة تتلقى خياراتها في الخاص؛ انتظروا حتى يعلن البوت النتيجة.`);
+  await sendGameMoment(env, room.chatId,
+    `🌙 حلّ الليل ${room.round}. الأدوار الخاصة تتلقى خياراتها في الخاص؛ انتظروا حتى يعلن البوت النتيجة.`, "night");
   const living = room.players.filter((player) => player.alive);
   for (const player of living) {
     if (!["wolf", "doctor", "qais"].includes(player.role)) continue;
@@ -239,9 +263,9 @@ async function resolveNight(env, room) {
   room.actions = { killVotes: {}, protect: null, inspect: null };
   room.votes = {};
   await saveRoom(env, room);
-  await sendMessage(env, room.chatId,
+  await sendGameMoment(env, room.chatId,
     "☀️ بدأ النهار. ناقشوا ثم صوّتوا على اللاعب الذي تريدون إقصاءه. يمكن لكل لاعب تغيير صوته قبل اكتمال التصويت.",
-    { reply_markup: dayKeyboard(room) });
+    "day", { reply_markup: dayKeyboard(room) });
 }
 
 async function resolveDay(env, room, force = false) {
