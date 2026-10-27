@@ -438,6 +438,10 @@ async function handleUpdate(env, update) {
   }
 }
 
+function setupPage() {
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WeirdWolf setup</title><style>:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0b0d12;color:#f1f3f8;font:16px/1.6 system-ui,sans-serif}.card{width:min(560px,92vw);padding:30px;border:1px solid #303544;border-radius:20px;background:#151a24}h1{margin-top:0}p{color:#b9c0ce}label{display:block;margin:20px 0 8px}input{width:100%;padding:13px;border:1px solid #454b5a;border-radius:10px;background:#0b0d12;color:white}button{margin-top:18px;padding:12px 16px;border:0;border-radius:10px;background:#f4bd69;color:#171717;font-weight:700}pre{white-space:pre-wrap;overflow-wrap:anywhere;color:#b9e8c9}</style></head><body><main class="card"><h1>WeirdWolf setup</h1><p>This one-time step registers this Worker as your Telegram bot webhook. Your bot token stays in Cloudflare Secrets and is never entered here.</p><form id="form"><label for="key">Setup key</label><input id="key" type="password" autocomplete="current-password" required><button type="submit">Register webhook</button></form><pre id="result" aria-live="polite"></pre><p><a href="/">Back to status page</a></p></main><script>document.getElementById("form").addEventListener("submit",async function(event){event.preventDefault();const result=document.getElementById("result");const button=event.target.querySelector("button");button.disabled=true;result.textContent="Registering…";try{const response=await fetch("/setup-webhook",{method:"POST",headers:{"Authorization":"Bearer "+document.getElementById("key").value,"Content-Type":"application/json"},body:"{}"});const data=await response.json();result.textContent=data.ok?"Success: "+(data.description||"Webhook registered."):("Error: "+(data.error||data.description||"Setup failed."));}catch(error){result.textContent="Request failed. Check the Worker deployment and try again.";}finally{button.disabled=false;}});</script></body></html>`;
+}
+
 function htmlPage() {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WeirdWolf</title><style>:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0b0d12;color:#f1f3f8;font:16px/1.6 system-ui,sans-serif}.card{width:min(720px,92vw);padding:36px;border:1px solid #303544;border-radius:24px;background:linear-gradient(145deg,#171b26,#10131b);box-shadow:0 24px 80px #0006}span{color:#f4bd69;letter-spacing:.16em;text-transform:uppercase;font-size:.78rem}h1{font-size:clamp(2.2rem,7vw,4rem);line-height:1.05;margin:.5rem 0 1rem}p{color:#c2c7d4}.status{display:inline-flex;align-items:center;gap:8px;border:1px solid #285b42;border-radius:99px;padding:6px 12px;color:#9ae2b4;font-size:.9rem}.dot{width:8px;height:8px;border-radius:50%;background:#62d994}footer{margin-top:32px;padding-top:18px;border-top:1px solid #303544;color:#858da0;font-size:.85rem}</style></head><body><main class="card"><span>Werewolf · Community game</span><h1>WeirdWolf</h1><p>A Telegram group game maintained by Qais (Weirdo), with a web-native deployment edition.</p><p class="status"><i class="dot"></i> Worker online</p><p><strong>Featured role:</strong> Qais, Keeper of Secrets — a unique oracle who privately investigates one player each night.</p><p>To play, open the bot on Telegram, press Start, add it to a group, and use <code>/newgame</code>.</p><footer>Independent fork. Original Werewolf project attribution and GPL-3.0 terms remain applicable.</footer></main></body></html>`;
 }
@@ -450,6 +454,26 @@ export default {
     }
     if (request.method === "GET" && url.pathname === "/health") {
       return Response.json({ ok: true, service: "WeirdWolf", runtime: "Cloudflare Workers" });
+    }
+    if (request.method === "GET" && url.pathname === "/setup") {
+      return new Response(setupPage(), { headers: { "content-type": "text/html; charset=utf-8" } });
+    }
+    if (request.method === "POST" && url.pathname === "/setup-webhook") {
+      if (!env.BOT_TOKEN || !env.WEBHOOK_SECRET || !env.SETUP_KEY) {
+        return Response.json({ ok: false, error: "Missing required Cloudflare secrets." }, { status: 503 });
+      }
+      if (request.headers.get("Authorization") !== `Bearer ${env.SETUP_KEY}`) {
+        return Response.json({ ok: false, error: "Incorrect setup key." }, { status: 403 });
+      }
+      const setup = await telegram(env, "setWebhook", {
+        url: `${url.origin}/telegram/webhook`,
+        secret_token: env.WEBHOOK_SECRET,
+        allowed_updates: ["message", "callback_query"],
+      });
+      return Response.json(
+        { ok: Boolean(setup.ok), description: setup.ok ? "Webhook registered." : (setup.description || "Telegram rejected the request.") },
+        { status: setup.ok ? 200 : 502 },
+      );
     }
     if (url.pathname !== "/telegram/webhook" || request.method !== "POST") {
       return new Response("Not found", { status: 404 });
