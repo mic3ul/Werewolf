@@ -6,11 +6,15 @@ WeirdWolf is a customized fork of Werewolf for Telegram, maintained by Qais (Wei
 
 For language file updates, please submit the xml file on Telegram to the [support chat](http://telegram.me/werewolfsupport) and ask for assistance
 
+## Web edition (phone-friendly)
+
+A separate Cloudflare Workers + D1 implementation is available in [`web/`](web/). It is designed for free-tier web hosting and can be configured from a mobile browser without a Windows server. See the [web deployment guide](web/README.md). This is an initial playable core and does not yet include every feature from the legacy C# application.
+
 ### Visual Studio Team Services Continuous Integration		
 ![build status](https://parabola949.visualstudio.com/_apis/public/build/definitions/c0505bb4-b972-452b-88be-acdc00501797/2/badge)
 
 ## Requirements
-* .NET Framework 4.5.2
+* .NET Framework 4.7.2 (the version targeted by the Node project file)
 * SQL Server (I am using 2014) / SQL Server 2016
 * Windows Server
 
