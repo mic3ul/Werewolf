@@ -8,4 +8,4 @@ workers_dev = true
 [[d1_databases]]
 binding = "DB"
 database_name = "weirdwolf-db"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id = "2a76e293-e43d-4d6d-ba11-76fbb4990095"
