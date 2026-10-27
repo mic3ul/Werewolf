@@ -69,7 +69,7 @@ export function getWinner(players) {
 
 function commandOf(message) {
   if (!message?.text || !message.text.startsWith("/")) return null;
-  return message.text.trim().split(/\\s+/)[0].split("@")[0].slice(1).toLowerCase();
+  return message.text.trim().split(/\s+/)[0].split("@")[0].slice(1).toLowerCase();
 }
 
 function chatIsGroup(chat) {
@@ -166,7 +166,7 @@ async function startGame(env, room) {
   const failed = [];
   for (const player of room.players) {
     const result = await sendMessage(env, player.userId,
-      `🎭 WeirdWolf — بطاقة دورك\\n\\nدورك: ${ROLE_NAMES[player.role]}\\n\\n${ROLE_DESCRIPTIONS[player.role]}\\n\\nلا تشارك هذه البطاقة مع المجموعة.`);
+      `🎭 WeirdWolf — بطاقة دورك\n\nدورك: ${ROLE_NAMES[player.role]}\n\n${ROLE_DESCRIPTIONS[player.role]}\n\nلا تشارك هذه البطاقة مع المجموعة.`);
     if (!result.ok) failed.push(playerName(player));
   }
   if (failed.length) {
@@ -181,7 +181,7 @@ async function startGame(env, room) {
     await sendMessage(env, player.userId, `رفقاء الليل: ${wolves.join("، ")}`);
   }
   await sendMessage(env, room.chatId,
-    `بدأت الجولة! أُرسلت الأدوار سرًا إلى اللاعبين. تذكّروا: قيس، عرّاف الأسرار، شخصية خاصة في WeirdWolf.\\n\\nعدد اللاعبين: ${room.players.length}`);
+    `بدأت الجولة! أُرسلت الأدوار سرًا إلى اللاعبين. تذكّروا: قيس، عرّاف الأسرار، شخصية خاصة في WeirdWolf.\n\nعدد اللاعبين: ${room.players.length}`);
   await openNight(env, room);
 }
 
@@ -193,7 +193,7 @@ async function checkAndFinish(env, room) {
   const message = winner === "wolves"
     ? "🐺 انتصر المستذئبون! سيطروا على القرية."
     : "🌅 نجت القرية! لم يبقَ أي مستذئب.";
-  await sendMessage(env, room.chatId, `${message}\\nاكتب /newgame لبدء جولة جديدة.`);
+  await sendMessage(env, room.chatId, `${message}\nاكتب /newgame لبدء جولة جديدة.`);
   return true;
 }
 
@@ -320,7 +320,7 @@ async function handleGroupCommand(env, message, command) {
 
   if (command === "help" || command === "start") {
     await sendMessage(env, chatId,
-      "🐺 WeirdWolf — لعبة المستذئبين\\n\\n/newgame — إنشاء غرفة\\n/join — الانضمام للغرفة\\n/leave — مغادرة اللوبي\\n/begin — بدء اللعبة (منشئ الغرفة فقط)\\n/players — عرض اللاعبين\\n/endday — إنهاء التصويت مبكرًا (منشئ الغرفة)\\n/cancel — إلغاء الجولة (منشئ الغرفة)\\n\\nقبل الانضمام، افتح البوت في الخاص واضغط Start حتى يستطيع إرسال دورك السري.");
+      "🐺 WeirdWolf — لعبة المستذئبين\n\n/newgame — إنشاء غرفة\n/join — الانضمام للغرفة\n/leave — مغادرة اللوبي\n/begin — بدء اللعبة (منشئ الغرفة فقط)\n/players — عرض اللاعبين\n/endday — إنهاء التصويت مبكرًا (منشئ الغرفة)\n/cancel — إلغاء الجولة (منشئ الغرفة)\n\nقبل الانضمام، افتح البوت في الخاص واضغط Start حتى يستطيع إرسال دورك السري.");
     return;
   }
 
@@ -344,7 +344,7 @@ async function handleGroupCommand(env, message, command) {
     };
     await saveRoom(env, room);
     await sendMessage(env, chatId,
-      `🐺 WeirdWolf — غرفة جديدة\\nأنشأها: ${firstName}\\n\\nاكتب /join للانضمام. تحتاج الجولة إلى 4 لاعبين على الأقل. لا تنسوا فتح البوت الخاص والضغط على Start أولًا.`);
+      `🐺 WeirdWolf — غرفة جديدة\nأنشأها: ${firstName}\n\nاكتب /join للانضمام. تحتاج الجولة إلى 4 لاعبين على الأقل. لا تنسوا فتح البوت الخاص والضغط على Start أولًا.`);
     return;
   }
 
@@ -360,7 +360,7 @@ async function handleGroupCommand(env, message, command) {
       return;
     }
     if (!await hasStarted(env, userId)) {
-      const link = env.BOT_USERNAME ? `\\nافتح: https://t.me/${env.BOT_USERNAME}` : "";
+      const link = env.BOT_USERNAME ? `\nافتح: https://t.me/${env.BOT_USERNAME}` : "";
       await sendMessage(env, chatId, `افتح البوت في الخاص واضغط Start أولًا؛ لن أستطيع إرسال دورك سرًا دون ذلك.${link}`);
       return;
     }
@@ -385,7 +385,7 @@ async function handleGroupCommand(env, message, command) {
   if (command === "players") {
     const players = room.players.map((player, i) =>
       `${i + 1}. ${playerName(player)}${player.alive ? "" : " — مُقصى"}`);
-    await sendMessage(env, chatId, `اللاعبون (${room.players.length}):\\n${players.length ? players.join("\\n") : "لا يوجد لاعبون بعد."}`);
+    await sendMessage(env, chatId, `اللاعبون (${room.players.length}):\n${players.length ? players.join("\n") : "لا يوجد لاعبون بعد."}`);
     return;
   }
 
@@ -426,7 +426,7 @@ async function handleUpdate(env, update) {
     if (command === "start" || command === "help") {
       await markStarted(env, message.from);
       await sendMessage(env, message.chat.id,
-        "مرحبًا بك في WeirdWolf. تم تفعيل الرسائل الخاصة حتى يصل إليك دورك في اللعبة.\\n\\nأضف البوت إلى مجموعة، ثم استخدم /newgame و/join. اكتب /help في المجموعة لعرض الأوامر.");
+        "مرحبًا بك في WeirdWolf. تم تفعيل الرسائل الخاصة حتى يصل إليك دورك في اللعبة.\n\nأضف البوت إلى مجموعة، ثم استخدم /newgame و/join. اكتب /help في المجموعة لعرض الأوامر.");
     }
     return;
   }
