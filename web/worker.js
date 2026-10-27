@@ -27,31 +27,63 @@ async function telegram(env, method, payload) {
   return result;
 }
 
-const sendMessage = (env, chatId, text, extra = {}) =>
-  telegram(env, "sendMessage", { chat_id: chatId, text, ...extra });
-
-// Mixed visual style: atmospheric GIFs at major game moments only.
-// If Telegram cannot fetch an animation, the normal text message is sent instead.
+// GIF-first messaging: every bot message attempts to send an animation.
+// If Telegram rejects the GIF or caption, deliver the text reliably as a fallback.
 const GAME_GIFS = {
   night: "https://media.tenor.com/2roX3uxz_68AAAAC/wolf-howling.gif",
   day: "https://media.tenor.com/0AVbKGY_MxMAAAAC/celebrate-happy.gif",
   win: "https://media.tenor.com/0AVbKGY_MxMAAAAC/celebrate-happy.gif",
   loss: "https://media.tenor.com/2roX3uxz_68AAAAC/wolf-howling.gif",
+  default: "https://media.tenor.com/0AVbKGY_MxMAAAAC/celebrate-happy.gif",
 };
 
-async function sendGameMoment(env, chatId, text, mood, extra = {}) {
-  const animation = GAME_GIFS[mood];
-  if (animation) {
-    const result = await telegram(env, "sendAnimation", {
-      chat_id: chatId,
-      animation,
-      caption: text,
-      ...extra,
-    });
-    if (result.ok) return result;
-    console.warn("Animation failed; falling back to text:", mood);
+async function sendPlainMessage(env, chatId, text, extra = {}) {
+  return telegram(env, "sendMessage", { chat_id: chatId, text, ...extra });
+}
+
+async function sendMessage(env, chatId, text, extra = {}) {
+  const content = String(text);
+  const animation = /حلّ الليل|المستذئبون|لم ينجُ|☠️|خسرت|هزيمة/i.test(content)
+    ? GAME_GIFS.night
+    : /انتص|نجت القرية|فوز|بدأ النهار|☀️|🌅/i.test(content)
+      ? GAME_GIFS.day
+      : GAME_GIFS.default;
+
+  // Telegram animation captions are limited to 1024 characters.
+  const caption = content.length <= 1024 ? content : content.slice(0, 1000) + "…";
+  const animated = await telegram(env, "sendAnimation", {
+    chat_id: chatId,
+    animation,
+    caption,
+    ...extra,
+  });
+  if (animated.ok) {
+    if (content.length > 1024) {
+      await sendPlainMessage(env, chatId, content.slice(1000));
+    }
+    return animated;
   }
-  return sendMessage(env, chatId, text, extra);
+  console.warn("GIF message failed; falling back to text:", animated.description || "unknown error");
+  return sendPlainMessage(env, chatId, content, extra);
+}
+
+async function sendGameMoment(env, chatId, text, mood, extra = {}) {
+  const animation = GAME_GIFS[mood] || GAME_GIFS.default;
+  // This helper explicitly selects the requested game-moment GIF.
+  const content = String(text);
+  const caption = content.length <= 1024 ? content : content.slice(0, 1000) + "…";
+  const result = await telegram(env, "sendAnimation", {
+    chat_id: chatId,
+    animation,
+    caption,
+    ...extra,
+  });
+  if (result.ok) {
+    if (content.length > 1024) await sendPlainMessage(env, chatId, content.slice(1000));
+    return result;
+  }
+  console.warn("Animation failed; falling back to text:", mood, result.description || "");
+  return sendPlainMessage(env, chatId, content, extra);
 }
 
 const answerCallback = (env, callbackId, text) =>
