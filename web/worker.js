@@ -275,10 +275,7 @@ async function handleCallback(env, query) {
   if (!room) return;
   const actorId = String(query.from.id);
   const actor = room.players.find((player) => player.userId === actorId && player.alive);
-  if (!actor) {
-    await answerCallback(env, query.id, "أنت لست لاعبًا حيًا في هذه الجولة.");
-    return;
-  }
+  if (!actor) return;
 
   if (kind === "n") {
     const action = parts[2];
