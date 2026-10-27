@@ -469,6 +469,7 @@ export default {
         url: `${url.origin}/telegram/webhook`,
         secret_token: env.WEBHOOK_SECRET,
         allowed_updates: ["message", "callback_query"],
+        max_connections: 1,
       });
       return Response.json(
         { ok: Boolean(setup.ok), description: setup.ok ? "Webhook registered." : (setup.description || "Telegram rejected the request.") },
