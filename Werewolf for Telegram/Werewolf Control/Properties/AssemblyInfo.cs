@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 #if RELEASE2
-[assembly: AssemblyTitle("Werewolf Control 2")]
-[assembly: AssemblyProduct("Werewolf Control 2")]
+[assembly: AssemblyTitle("WeirdWolf Control 2")]
+[assembly: AssemblyProduct("WeirdWolf Control 2")]
 #else
-[assembly: AssemblyTitle("Werewolf Control")]
-[assembly: AssemblyProduct("Werewolf Control")]
+[assembly: AssemblyTitle("WeirdWolf Control")]
+[assembly: AssemblyProduct("WeirdWolf Control")]
 #endif
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
