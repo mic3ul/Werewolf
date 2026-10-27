@@ -75,7 +75,7 @@ namespace Werewolf_Control
             Assembly assembly = Assembly.GetExecutingAssembly();
             FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
             string version = fvi.FileVersion;
-            Console.Title = $"Werewolf Moderator {version}";
+            Console.Title = $"WeirdWolf Moderator {version}";
 
 
             //Make sure another instance isn't already running
