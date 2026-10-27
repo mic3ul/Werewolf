@@ -1,8 +1,8 @@
-# Werewolf for Telegram
+# WeirdWolf — Werewolf for Telegram
 
 [![@werewolfbot MAU](https://tgbotmau.quoi.dev/api/bot/werewolfbot/mau/badge?style=flat "@werewolfbot MAU")](https://tgbotmau.quoi.dev/?bot=werewolfbot)
 
-This is the main repo for Werewolf for Telegram.
+WeirdWolf is a customized fork of Werewolf for Telegram, maintained by Qais (Weirdo). It builds upon the original project while preserving its license and upstream attribution.
 
 For language file updates, please submit the xml file on Telegram to the [support chat](http://telegram.me/werewolfsupport) and ask for assistance
 
@@ -16,7 +16,7 @@ For language file updates, please submit the xml file on Telegram to the [suppor
 
 ## Setup
 
-To set up werewolf on a private server, follow these steps:
+To set up WeirdWolf on a private server, follow these steps:
 
 1. Go to [BotFather](https://telegram.me/BotFather) and create a new bot.  Answer all of the questions it asks, and you will receive an API Token.
    * On your server, open regedit, and go to `HKLM\SOFTWARE\`, create a new Key named `Werewolf` (HKLM - HKEY_LOCAL_MACHINE)
@@ -59,3 +59,8 @@ To set up werewolf on a private server, follow these steps:
 In order to use GIFs with the bot, you will need to "teach" the bot the new GIF IDs.  From Telegram, run `/learngif`, the bot will respond with `GIF learning = true`.  Now send it a GIF, and the bot will reply with an ID.  Send the bot all the GIFs you need.  In the Node project, go to Helpers > Settings.cs and find the GIF lists.  You'll need to remove all of the existing IDs and put in the IDs you just got from the bot.
 
 You can test these by running `/dumpgifs` (preferrably in Private Message!).  Make sure you check out DevCommands.cs, and look at the `DumpGifs()` method - most of it is commented out.  Uncomment what you need.
+
+
+## Project attribution
+
+WeirdWolf is an independent fork. The original project's license and upstream attribution remain in effect; see the repository's license file for the full terms.
