@@ -30,24 +30,35 @@ async function telegram(env, method, payload) {
 // GIF-first messaging: every bot message attempts to send an animation.
 // If Telegram rejects the GIF or caption, deliver the text reliably as a fallback.
 const GAME_GIFS = {
-  night: "https://media1.giphy.com/media/It5lfXZRTqIbyFOv5O/giphy.gif",
-  day: "https://media1.giphy.com/media/It5lfXZRTqIbyFOv5O/giphy.gif",
-  win: "https://media1.giphy.com/media/It5lfXZRTqIbyFOv5O/giphy.gif",
-  loss: "https://media1.giphy.com/media/It5lfXZRTqIbyFOv5O/giphy.gif",
-  default: "https://media1.giphy.com/media/It5lfXZRTqIbyFOv5O/giphy.gif",
+  // Themed animations: werewolf horror, village celebration, and game events.
+  werewolf: "https://media1.giphy.com/media/14ypz3rg3Ziz8A/giphy.gif",
+  night: "https://media1.giphy.com/media/qSqjILPWroxh3XER4f/giphy.gif",
+  day: "https://media1.giphy.com/media/2ALaD4gPCLPvzHfSpK/giphy.gif",
+  villageWin: "https://media1.giphy.com/media/2ALaD4gPCLPvzHfSpK/giphy.gif",
+  wolvesWin: "https://media1.giphy.com/media/xzuD8qRHBONOuqdnBm/giphy.gif",
+  eliminated: "https://media1.giphy.com/media/qSqjILPWroxh3XER4f/giphy.gif",
+  protected: "https://media1.giphy.com/media/2ALaD4gPCLPvzHfSpK/giphy.gif",
+  vote: "https://media1.giphy.com/media/2ALaD4gPCLPvzHfSpK/giphy.gif",
+  default: "https://media1.giphy.com/media/14ypz3rg3Ziz8A/giphy.gif",
 };
 
 async function sendPlainMessage(env, chatId, text, extra = {}) {
   return telegram(env, "sendMessage", { chat_id: chatId, text, ...extra });
 }
 
+function gifForMessage(content) {
+  if (/نجت القرية|لم يبقَ أي مستذئب|انتصرت القرية|فاز القرويون/i.test(content)) return GAME_GIFS.villageWin;
+  if (/انتصَر المستذئبون|انتصر المستذئبون|سيطروا على القرية|فاز المستذئبون/i.test(content)) return GAME_GIFS.wolvesWin;
+  if (/حلّ الليل|المستذئبون|بطاقة دورك|رفقاء الليل|اختر هدف المستذئبين|☠️|لم ينجُ/i.test(content)) return GAME_GIFS.werewolf;
+  if (/بدأ النهار|مرّت الليلة دون إقصاء|نجا|🛡️/i.test(content)) return GAME_GIFS.day;
+  if (/صوّتت القرية|انتهى التصويت|تسجيل صوت|⚖️|🗳️/i.test(content)) return GAME_GIFS.vote;
+  if (/انتهت الجولة الحالية|إلغاء الجولة/i.test(content)) return GAME_GIFS.eliminated;
+  return GAME_GIFS.default;
+}
+
 async function sendMessage(env, chatId, text, extra = {}) {
   const content = String(text);
-  const animation = /حلّ الليل|المستذئبون|لم ينجُ|☠️|خسرت|هزيمة/i.test(content)
-    ? GAME_GIFS.night
-    : /انتص|نجت القرية|فوز|بدأ النهار|☀️|🌅/i.test(content)
-      ? GAME_GIFS.day
-      : GAME_GIFS.default;
+  const animation = gifForMessage(content);
 
   // Telegram animation captions are limited to 1024 characters.
   const caption = content.length <= 1024 ? content : content.slice(0, 1000) + "…";
@@ -249,7 +260,7 @@ async function checkAndFinish(env, room) {
   const message = winner === "wolves"
     ? "🐺 انتصر المستذئبون! سيطروا على القرية."
     : "🌅 نجت القرية! لم يبقَ أي مستذئب.";
-  await sendMessage(env, room.chatId, `${message}\nاكتب /newgame لبدء جولة جديدة.`);
+  await sendGameMoment(env, room.chatId, `${message}\nاكتب /newgame لبدء جولة جديدة.`, winner === "wolves" ? "wolvesWin" : "villageWin");
   return true;
 }
 
