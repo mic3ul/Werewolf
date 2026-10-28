@@ -386,8 +386,8 @@ async function handleGroupCommand(env, message, command) {
   const username = message.from.username || null;
   const privateStartKeyboard = {
     inline_keyboard: [[{
-      text: "▶️ Start في الخاص",
-      url: "https://t.me/weirdwolfbot?start=group",
+      text: "Start",
+      url: "https://t.me/weirdoqaisbot",
     }]],
   };
 
