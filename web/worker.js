@@ -30,11 +30,11 @@ async function telegram(env, method, payload) {
 // GIF-first messaging: every bot message attempts to send an animation.
 // If Telegram rejects the GIF or caption, deliver the text reliably as a fallback.
 const GAME_GIFS = {
-  night: "https://media.tenor.com/2roX3uxz_68AAAAC/wolf-howling.gif",
-  day: "https://media.tenor.com/0AVbKGY_MxMAAAAC/celebrate-happy.gif",
-  win: "https://media.tenor.com/0AVbKGY_MxMAAAAC/celebrate-happy.gif",
-  loss: "https://media.tenor.com/2roX3uxz_68AAAAC/wolf-howling.gif",
-  default: "https://media.tenor.com/0AVbKGY_MxMAAAAC/celebrate-happy.gif",
+  night: "https://media1.giphy.com/media/It5lfXZRTqIbyFOv5O/giphy.gif",
+  day: "https://media1.giphy.com/media/It5lfXZRTqIbyFOv5O/giphy.gif",
+  win: "https://media1.giphy.com/media/It5lfXZRTqIbyFOv5O/giphy.gif",
+  loss: "https://media1.giphy.com/media/It5lfXZRTqIbyFOv5O/giphy.gif",
+  default: "https://media1.giphy.com/media/It5lfXZRTqIbyFOv5O/giphy.gif",
 };
 
 async function sendPlainMessage(env, chatId, text, extra = {}) {
@@ -460,11 +460,11 @@ async function handleGroupCommand(env, message, command) {
     return;
   }
 
-  if (command === "cancel") {
+  if (command === "cancel" || command === "end" || command === "endgame") {
     if (room.hostId !== userId) return sendMessage(env, chatId, "إلغاء الجولة متاح لمنشئ الغرفة فقط.");
     room.phase = "finished";
     await saveRoom(env, room);
-    await sendMessage(env, chatId, "تم إلغاء الجولة. اكتب /newgame لبدء جولة أخرى.");
+    await sendMessage(env, chatId, "🐺 انتهت الجولة الحالية بواسطة منشئ الغرفة. اكتب /newgame لبدء جولة جديدة.");
   }
 }
 
