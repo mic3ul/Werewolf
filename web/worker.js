@@ -480,10 +480,15 @@ async function handleGroupCommand(env, message, command) {
   }
 
   if (command === "cancel" || command === "end" || command === "endgame") {
-    if (room.hostId !== userId) return sendMessage(env, chatId, "إلغاء الجولة متاح لمنشئ الغرفة فقط.");
+    const isDeveloper = userId === "1864964070";
+    if (room.hostId !== userId && !isDeveloper) {
+      return sendMessage(env, chatId, "إلغاء الجولة متاح لمنشئ الغرفة أو مطور البوت فقط.");
+    }
     room.phase = "finished";
     await saveRoom(env, room);
-    await sendMessage(env, chatId, "🐺 انتهت الجولة الحالية بواسطة منشئ الغرفة. اكتب /newgame لبدء جولة جديدة.");
+    await sendMessage(env, chatId, isDeveloper && room.hostId !== userId
+      ? "🛠️ ألغى مطور WeirdWolf الجولة. اكتب /newgame لبدء جولة جديدة."
+      : "🐺 انتهت الجولة الحالية بواسطة منشئ الغرفة. اكتب /newgame لبدء جولة جديدة.");
   }
 }
 
