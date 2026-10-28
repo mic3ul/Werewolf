@@ -384,10 +384,17 @@ async function handleGroupCommand(env, message, command) {
   const userId = String(message.from.id);
   const firstName = message.from.first_name || "Player";
   const username = message.from.username || null;
+  const privateStartKeyboard = {
+    inline_keyboard: [[{
+      text: "▶️ Start في الخاص",
+      url: "https://t.me/weirdwolfbot?start=group",
+    }]],
+  };
 
   if (command === "help" || command === "start") {
     await sendMessage(env, chatId,
-      "🐺 WeirdWolf — لعبة المستذئبين\n\n/newgame — إنشاء غرفة\n/join — الانضمام للغرفة\n/leave — مغادرة اللوبي\n/begin — بدء اللعبة (منشئ الغرفة فقط)\n/players — عرض اللاعبين\n/endday — إنهاء التصويت مبكرًا (منشئ الغرفة)\n/cancel — إلغاء الجولة (منشئ الغرفة)\n\nقبل الانضمام، افتح البوت في الخاص واضغط Start حتى يستطيع إرسال دورك السري.");
+      "🐺 WeirdWolf — لعبة المستذئبين\n\n/newgame — إنشاء غرفة\n/join — الانضمام للغرفة\n/leave — مغادرة اللوبي\n/begin — بدء اللعبة (منشئ الغرفة فقط)\n/players — عرض اللاعبين\n/endday — إنهاء التصويت مبكرًا (منشئ الغرفة)\n/cancel — إلغاء الجولة (منشئ الغرفة)\n\nاضغط الزر أدناه لفتح البوت في الخاص وتفعيل استقبال دورك السري.",
+      { reply_markup: privateStartKeyboard });
     return;
   }
 
@@ -427,8 +434,9 @@ async function handleGroupCommand(env, message, command) {
       return;
     }
     if (!await hasStarted(env, userId)) {
-      const link = env.BOT_USERNAME ? `\nافتح: https://t.me/${env.BOT_USERNAME}` : "";
-      await sendMessage(env, chatId, `افتح البوت في الخاص واضغط Start أولًا؛ لن أستطيع إرسال دورك سرًا دون ذلك.${link}`);
+      await sendMessage(env, chatId,
+        "قبل الانضمام، افتح البوت في الخاص واضغط Start مرة واحدة حتى أستطيع إرسال دورك السري. اضغط الزر أدناه للانتقال مباشرةً إلى البوت.",
+        { reply_markup: privateStartKeyboard });
       return;
     }
     if (room.players.some((player) => player.userId === userId)) {
